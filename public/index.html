@@ -3,67 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Profil Sorgula</title>
+    <title>TikTok Profil Analiz</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; padding: 20px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
-        input { width: 80%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; }
-        button { background: #fe2c55; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        #result { margin-top: 20px; text-align: left; display: none; }
-        .avatar { width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 10px; display: block; border: 2px solid #fe2c55; }
-        .stat { font-weight: bold; color: #fe2c55; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, system-ui, sans-serif; }
+        body { background-color: #f8f8f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .card { background: white; width: 100%; max-width: 400px; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
+        .logo { width: 120px; margin-bottom: 20px; }
+        h2 { font-size: 22px; margin-bottom: 10px; color: #161823; }
+        .search-box { position: relative; margin: 20px 0; }
+        input { width: 100%; padding: 12px 15px; border: 1px solid #e3e3e4; border-radius: 8px; background: #f1f1f2; outline: none; font-size: 16px; }
+        button { width: 100%; background: #fe2c55; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        
+        /* SONUÇ ALANI */
+        #result { display: none; margin-top: 25px; border-top: 1px solid #eee; pt: 20px; text-align: left; }
+        .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; margin-top: 20px;}
+        .avatar { width: 70px; height: 70px; border-radius: 50%; border: 2px solid #fe2c55; object-fit: cover; }
+        .names h3 { font-size: 18px; color: #161823; }
+        .names p { font-size: 14px; color: #8a8b91; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .stat-item { background: #f8f8f8; padding: 10px; border-radius: 8px; text-align: center; }
+        .stat-value { display: block; font-weight: 800; color: #fe2c55; font-size: 16px; }
+        .stat-label { font-size: 11px; color: #8a8b91; text-transform: uppercase; }
+        .bio { font-size: 13px; color: #555; line-height: 1.4; background: #fff9fa; padding: 10px; border-radius: 8px; border: 1px dashed #fe2c55; }
+        #loading { display: none; color: #fe2c55; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>TikTok Profil Bul</h2>
-    <input type="text" id="targetUser" placeholder="Kullanıcı adı (örn: kamil)">
-    <button onclick="sorgula()">Sorgula</button>
-
-    <div id="loading" style="display:none;">Taranıyor...</div>
+    <img src="https://upload.wikimedia.org/wikipedia/en/a/a9/TikTok_logo.svg" class="logo">
+    <h2>Profil Sorgula</h2>
+    <div class="search-box">
+        <input type="text" id="targetUser" placeholder="Kullanıcı adı (örn: kamil)">
+        <button onclick="sorgula()">VERİLERİ GETİR</button>
+        <div id="loading">📡 TikTok taranıyor...</div>
+    </div>
 
     <div id="result">
-        <img id="res-avatar" class="avatar" src="">
-        <h3 id="res-nickname" style="text-align:center;"></h3>
-        <p>🆔 <b>Kullanıcı:</b> <span id="res-user"></span></p>
-        <p>👥 <b>Takipçi:</b> <span id="res-followers" class="stat"></span></p>
-        <p>❤️ <b>Beğeni:</b> <span id="res-likes" class="stat"></span></p>
-        <p>📝 <b>Bio:</b> <span id="res-bio"></span></p>
+        <div class="profile-header">
+            <img id="res-avatar" class="avatar" src="">
+            <div class="names">
+                <h3 id="res-nickname"></h3>
+                <p id="res-user"></p>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-item"><span class="stat-value" id="res-followers">0</span><span class="stat-label">Takipçi</span></div>
+            <div class="stat-item"><span class="stat-value" id="res-following">0</span><span class="stat-label">Takip</span></div>
+            <div class="stat-item"><span class="stat-value" id="res-likes">0</span><span class="stat-label">Beğeni</span></div>
+        </div>
+
+        <p class="bio"><b>Hakkında:</b> <br><span id="res-bio"></span></p>
     </div>
 </div>
 
 <script>
     async function sorgula() {
-        const user = document.getElementById('targetUser').value;
-        if(!user) return alert("İsim yazın!");
+        const user = document.getElementById('targetUser').value.trim().replace('@', '');
+        if(!user) return alert("Lütfen bir kullanıcı adı girin.");
 
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('result').style.display = 'none';
+        const btn = document.querySelector('button');
+        const loading = document.getElementById('loading');
+        const resultDiv = document.getElementById('result');
+
+        btn.disabled = true;
+        loading.style.display = 'block';
+        resultDiv.style.display = 'none';
 
         try {
-            const response = await fetch('/api/fetch-profile', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ username: user })
-            });
+            // Render banını aşmak için AllOrigins gibi bir CORS proxy kullanıyoruz
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://www.tiktok.com/@' + user)}`;
+            const response = await fetch(proxyUrl);
             const data = await response.json();
+            
+            const html = data.contents;
+            const regex = /<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" type="application\/json">([\s\S]*?)<\/script>/;
+            const match = html.match(regex);
 
-            if (data.error) {
-                alert(data.error);
+            if (!match) throw new Error("Profil verisi bulunamadı. Lütfen kullanıcı adını kontrol edin.");
+
+            const fullData = JSON.parse(match[1]);
+            const info = fullData.__DEFAULT_SCOPE__?.["webapp.user-detail"]?.userInfo;
+
+            if (info) {
+                document.getElementById('res-avatar').src = info.user.avatarLarger;
+                document.getElementById('res-nickname').textContent = info.user.nickname;
+                document.getElementById('res-user').textContent = "@" + info.user.uniqueId;
+                document.getElementById('res-followers').textContent = info.stats.followerCount.toLocaleString();
+                document.getElementById('res-following').textContent = info.stats.followingCount.toLocaleString();
+                document.getElementById('res-likes').textContent = info.stats.heartCount.toLocaleString();
+                document.getElementById('res-bio').textContent = info.user.signature || "Bio bulunmuyor.";
+                
+                resultDiv.style.display = 'block';
             } else {
-                document.getElementById('res-avatar').src = data.avatar;
-                document.getElementById('res-nickname').textContent = data.nickname;
-                document.getElementById('res-user').textContent = "@" + data.username;
-                document.getElementById('res-followers').textContent = data.followers.toLocaleString();
-                document.getElementById('res-likes').textContent = data.likes.toLocaleString();
-                document.getElementById('res-bio').textContent = data.bio || "Yok";
-                document.getElementById('result').style.display = 'block';
+                alert("Kullanıcı bilgileri çekilemedi.");
             }
         } catch (e) {
-            alert("Hata oluştu!");
+            alert("Hata: " + e.message);
         } finally {
-            document.getElementById('loading').style.display = 'none';
+            btn.disabled = false;
+            loading.style.display = 'none';
         }
     }
 </script>
